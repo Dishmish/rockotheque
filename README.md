@@ -28,6 +28,8 @@ Rockothèque est une application web permettant de gérer une collection personn
 
 ```bash
 php -S localhost:8000
+```
+
 ## Schéma de la base de données
 
 ![Schéma relationnel de Rockothèque](images/rockotheque-erd.png)

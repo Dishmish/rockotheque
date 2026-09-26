@@ -2,6 +2,10 @@
 
 Rockothèque est une application web permettant de gérer une collection personnelle d’albums rock.
 
+## Site en ligne
+
+[Visiter Rockothèque](https://rockotheque-dmitriy.free.je)
+
 ## Fonctionnalités
 
 - Afficher les albums

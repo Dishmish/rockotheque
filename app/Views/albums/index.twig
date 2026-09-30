@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockothèque — Albums</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Les albums de Rockothèque</h1>
+
+    <p><a href="/">Accueil</a></p>
+
+    {% for album in albums %}
+        <article>
+            <h2>{{ album.title }}</h2>
+
+            <p><strong>Artiste :</strong> {{ album.artists }}</p>
+            <p><strong>Genre :</strong> {{ album.genre }}</p>
+            <p><strong>Année :</strong> {{ album.release_year }}</p>
+
+            <p>
+                <strong>Note moyenne :</strong>
+                {% if album.average_rating is not null %}
+                    {{ album.average_rating }}/5
+                {% else %}
+                    Aucune évaluation
+                {% endif %}
+            </p>
+
+            <p>{{ album.description }}</p>
+        </article>
+    {% else %}
+        <p>Aucun album pour le moment.</p>
+    {% endfor %}
+</body>
+</html>

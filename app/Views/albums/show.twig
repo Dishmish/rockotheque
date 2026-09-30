@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ album.title }} — Rockothèque</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Rockothèque</h1>
+
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/albums">Les albums</a>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+            <h2>{{ album.title }}</h2>
+
+            <p>
+                <strong>Année :</strong>
+                {{ album.release_year }}
+            </p>
+
+            <h3>Artistes</h3>
+
+            <ul>
+                {% for artist in artists %}
+                    <li>{{ artist.name }} — {{ artist.role }}</li>
+                {% else %}
+                    <li>Aucun artiste associé.</li>
+                {% endfor %}
+            </ul>
+
+            <p>{{ album.description }}</p>
+        </article>
+
+        <section>
+            <h2>Avis publiés</h2>
+
+            {% for review in reviews %}
+                <article>
+                    <h3>{{ review.reviewer_name }}</h3>
+
+                    <p>
+                        <strong>Note :</strong>
+                        {{ review.rating }}/5
+                    </p>
+
+                    <p>{{ review.comment }}</p>
+
+                    <p>
+                        <small>{{ review.created_at }}</small>
+                    </p>
+                </article>
+            {% else %}
+                <p>Aucun avis pour cet album.</p>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>

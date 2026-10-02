@@ -1,5 +1,11 @@
 <?php
 
+session_start();
+
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/../app/Models/Model.php';
@@ -55,6 +61,34 @@ if ($method === 'GET' && $path === '/') {
     );
 
     $controller->show(
+        $id,
+        new AlbumArtist($pdo),
+        new Review($pdo)
+    );
+
+} elseif (
+    $method === 'POST'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/reviews$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->createReview(
         $id,
         new AlbumArtist($pdo),
         new Review($pdo)

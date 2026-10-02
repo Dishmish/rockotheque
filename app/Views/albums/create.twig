@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un album — Rockothèque</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Rockothèque</h1>
+
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/albums">Les albums</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Ajouter un album</h2>
+
+        {% if errors %}
+            <section>
+                <h3>Veuillez corriger les erreurs suivantes :</h3>
+
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <form action="/albums" method="post">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <p>
+                <label for="title">Titre</label><br>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{{ form.title }}"
+                    maxlength="200"
+                    required
+                >
+            </p>
+
+            <p>
+                <label for="release_year">Année de sortie</label><br>
+                <input
+                    type="number"
+                    id="release_year"
+                    name="release_year"
+                    min="1900"
+                    max="{{ current_year }}"
+                    value="{{ form.release_year }}"
+                    required
+                >
+            </p>
+
+            <p>
+                <label for="genre_id">Genre</label><br>
+                <select id="genre_id" name="genre_id" required>
+                    <option value="">Choisir un genre</option>
+
+                    {% for genre in genres %}
+                        <option
+                            value="{{ genre.id }}"
+                            {% if form.genre_id == genre.id %}selected{% endif %}
+                        >
+                            {{ genre.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </p>
+
+            <fieldset>
+                <legend>Artistes</legend>
+
+                {% for artist in artists %}
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="artist_ids[]"
+                            value="{{ artist.id }}"
+                            {% if artist.id in form.artist_ids %}checked{% endif %}
+                        >
+                        {{ artist.name }}
+                    </label>
+                    <br>
+                {% endfor %}
+            </fieldset>
+
+            <p>
+                <label for="description">Description</label><br>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="6"
+                    maxlength="5000"
+                >{{ form.description }}</textarea>
+            </p>
+
+            <button type="submit">Ajouter l’album</button>
+        </form>
+    </main>
+</body>
+</html>

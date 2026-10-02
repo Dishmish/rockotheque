@@ -19,6 +19,7 @@ class AlbumController
 
         echo $this->twig->render('albums/index.twig', [
             'albums' => $albums,
+            'created' => isset($_GET['created']),
         ]);
     }
     public function show(
@@ -156,6 +157,177 @@ public function createReview(
         303
     );
 
+    exit;
+}
+public function create(
+    Genre $genreModel,
+    Artist $artistModel,
+    array $errors = [],
+    array $form = []
+): void {
+    $form = array_merge([
+        'title' => '',
+        'release_year' => '',
+        'genre_id' => '',
+        'artist_ids' => [],
+        'description' => '',
+    ], $form);
+
+    echo $this->twig->render('albums/create.twig', [
+        'genres' => $genreModel->getAll(),
+        'artists' => $artistModel->getAll(),
+        'errors' => $errors,
+        'form' => $form,
+        'current_year' => (int) date('Y'),
+        'csrf_token' => $_SESSION['csrf_token'],
+    ]);
+}
+public function store(
+    Genre $genreModel,
+    Artist $artistModel
+): void {
+    $token = $_POST['csrf_token'] ?? '';
+
+    if (
+        !is_string($token)
+        || !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        http_response_code(403);
+        echo 'Formulaire invalide. Rechargez la page.';
+        return;
+    }
+
+    $form = [];
+
+    foreach (
+        ['title', 'release_year', 'genre_id', 'description']
+        as $field
+    ) {
+        $value = $_POST[$field] ?? '';
+        $form[$field] = is_string($value) ? trim($value) : '';
+    }
+
+    $errors = [];
+
+    if ($form['title'] === '') {
+        $errors[] = 'Le titre est obligatoire.';
+    } elseif (mb_strlen($form['title'], 'UTF-8') > 200) {
+        $errors[] = 'Le titre ne doit pas dépasser 200 caractères.';
+    }
+
+    $year = filter_var(
+        $form['release_year'],
+        FILTER_VALIDATE_INT
+    );
+
+    if (
+        $year === false
+        || $year < 1900
+        || $year > (int) date('Y')
+    ) {
+        $errors[] = 'L’année de sortie est invalide.';
+    }
+
+    $genreId = filter_var(
+        $form['genre_id'],
+        FILTER_VALIDATE_INT
+    );
+
+    $validGenreIds = array_map(
+        'intval',
+        array_column($genreModel->getAll(), 'id')
+    );
+
+    if (
+        $genreId === false
+        || !in_array($genreId, $validGenreIds, true)
+    ) {
+        $errors[] = 'Veuillez choisir un genre valide.';
+    }
+
+    $validArtistIds = array_map(
+        'intval',
+        array_column($artistModel->getAll(), 'id')
+    );
+
+    $submittedArtistIds = $_POST['artist_ids'] ?? [];
+    $form['artist_ids'] = [];
+
+    if (!is_array($submittedArtistIds)) {
+        $errors[] = 'La sélection des artistes est invalide.';
+    } else {
+        foreach ($submittedArtistIds as $value) {
+            $artistId = is_string($value)
+                ? filter_var($value, FILTER_VALIDATE_INT)
+                : false;
+
+            if (
+                $artistId === false
+                || !in_array($artistId, $validArtistIds, true)
+            ) {
+                $errors[] = 'Un artiste sélectionné est invalide.';
+                continue;
+            }
+
+            $form['artist_ids'][] = $artistId;
+        }
+    }
+
+    $form['artist_ids'] = array_values(
+        array_unique($form['artist_ids'])
+    );
+
+    if ($form['artist_ids'] === []) {
+        $errors[] = 'Veuillez choisir au moins un artiste.';
+    }
+
+    if (mb_strlen($form['description'], 'UTF-8') > 5000) {
+        $errors[] = 'La description ne doit pas dépasser 5000 caractères.';
+    }
+
+    if ($errors !== []) {
+        http_response_code(422);
+
+        $this->create(
+            $genreModel,
+            $artistModel,
+            $errors,
+            $form
+        );
+
+        return;
+    }
+
+    try {
+        $created = $this->albumModel->create(
+            [
+                'genre_id' => $genreId,
+                'title' => $form['title'],
+                'release_year' => $year,
+                'cover_image' => null,
+                'description' => $form['description'],
+            ],
+            $form['artist_ids']
+        );
+    } catch (PDOException $exception) {
+        error_log((string) $exception);
+        $created = false;
+    }
+
+    if (!$created) {
+        http_response_code(500);
+
+        $this->create(
+            $genreModel,
+            $artistModel,
+            ['Impossible d’ajouter l’album. Veuillez réessayer.'],
+            $form
+        );
+
+        return;
+    }
+
+    header('Location: /albums?created=1', true, 303);
     exit;
 }
 }

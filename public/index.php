@@ -12,6 +12,8 @@ require_once __DIR__ . '/../app/Models/Model.php';
 require_once __DIR__ . '/../app/Models/Album.php';
 require_once __DIR__ . '/../app/Models/AlbumArtist.php';
 require_once __DIR__ . '/../app/Models/Review.php';
+require_once __DIR__ . '/../app/Models/Genre.php';
+require_once __DIR__ . '/../app/Models/Artist.php';
 
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/AlbumController.php';
@@ -32,6 +34,19 @@ if ($method === 'GET' && $path === '/') {
     $controller = new HomeController($twig);
     $controller->index();
 
+} elseif ($method === 'POST' && $path === '/albums') {
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->store(
+        new Genre($pdo),
+        new Artist($pdo)
+    );
+
 } elseif ($method === 'GET' && $path === '/albums') {
     $pdo = require __DIR__ . '/../config/database.php';
 
@@ -41,6 +56,19 @@ if ($method === 'GET' && $path === '/') {
     );
 
     $controller->index();
+
+} elseif ($method === 'GET' && $path === '/albums/create') {
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->create(
+        new Genre($pdo),
+        new Artist($pdo)
+    );
 
 } elseif (
     $method === 'GET'

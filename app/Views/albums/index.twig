@@ -10,6 +10,11 @@
     <h1>Les albums de Rockothèque</h1>
 
     <p><a href="/">Accueil</a></p>
+    <p><a href="/albums/create">Ajouter un album</a></p>
+
+{% if created %}
+    <p>L’album a été ajouté avec succès.</p>
+{% endif %}
 
     {% for album in albums %}
         <article>

@@ -23,10 +23,8 @@
 {% endif %}
 
     {% for album in albums %}
-    <p>
-    <a href="/albums/{{ album.id }}/edit">Modifier</a>
-</p>
-        <article>
+    
+    <article>
             <h2>{{ album.title }}</h2>
 
             <p><strong>Artiste :</strong> {{ album.artists }}</p>
@@ -56,6 +54,12 @@
 
     <button type="submit">Supprimer</button>
 </form>
+<p>
+    <a href="/albums/{{ album.id }}">Voir les détails et les avis</a>
+</p>
+<p>
+    <a href="/albums/{{ album.id }}/edit">Modifier</a>
+</p>
         </article>
     {% else %}
         <p>Aucun album pour le moment.</p>

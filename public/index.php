@@ -28,13 +28,14 @@ $twig = new \Twig\Environment($loader, [
 ]);
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = rtrim($path, '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET' && $path === '/') {
     $controller = new HomeController($twig);
     $controller->index();
 
-} elseif ($method === 'POST' && $path === '/albums') {
+} elseif ($method === 'POST' && $path === '/albums/store') {
     $pdo = require __DIR__ . '/../config/database.php';
 
     $controller = new AlbumController(

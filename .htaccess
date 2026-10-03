@@ -1,7 +1,10 @@
 RewriteEngine On
 
-# La page d'accueil passe par le contrôleur frontal.
-RewriteRule ^$ public/index.php [L]
+# Éviter de réécrire les adresses déjà dirigées vers public.
+RewriteRule ^public/ - [L]
 
-# Les autres adresses sont dirigées vers le dossier public.
-RewriteRule ^(?!public/)(.*)$ public/$1 [L]
+# Servir les fichiers CSS.
+RewriteRule ^css/(.*)$ public/css/$1 [L]
+
+# Envoyer les requêtes directement au contrôleur frontal.
+RewriteRule ^ public/index.php [L]

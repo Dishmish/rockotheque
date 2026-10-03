@@ -1,0 +1,10 @@
+DirectoryIndex index.php
+
+RewriteEngine On
+
+# Les fichiers et dossiers existants sont servis directement.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Les autres requêtes passent par le contrôleur frontal.
+RewriteRule ^ index.php [QSA,L]

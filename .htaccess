@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# La page d'accueil passe par le contrôleur frontal.
+RewriteRule ^$ public/index.php [L]
+
+# Les autres adresses sont dirigées vers le dossier public.
+RewriteRule ^(?!public/)(.*)$ public/$1 [L]

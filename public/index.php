@@ -113,6 +113,30 @@ if ($method === 'GET' && $path === '/') {
         new Artist($pdo)
     );
 
+} elseif (
+    $method === 'POST'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/delete$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->delete($id);
+
 } elseif ($method === 'GET' && $path === '/albums/create') {
     $pdo = require __DIR__ . '/../config/database.php';
 

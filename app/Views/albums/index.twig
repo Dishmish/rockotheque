@@ -18,6 +18,9 @@
 {% if updated %}
     <p>L’album a été modifié avec succès.</p>
 {% endif %}
+{% if deleted %}
+    <p>L’album a été supprimé avec succès.</p>
+{% endif %}
 
     {% for album in albums %}
     <p>
@@ -40,6 +43,19 @@
             </p>
 
             <p>{{ album.description }}</p>
+            <form
+    action="/albums/{{ album.id }}/delete"
+    method="post"
+    onsubmit="return confirm('Voulez-vous vraiment supprimer cet album ?');"
+>
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token }}"
+    >
+
+    <button type="submit">Supprimer</button>
+</form>
         </article>
     {% else %}
         <p>Aucun album pour le moment.</p>

@@ -21,6 +21,8 @@ class AlbumController
             'albums' => $albums,
             'created' => isset($_GET['created']),
             'updated' => isset($_GET['updated']),
+            'deleted' => isset($_GET['deleted']),
+            'csrf_token' => $_SESSION['csrf_token'],
         ]);
     }
     public function show(
@@ -448,6 +450,41 @@ public function update(
     }
 
     header('Location: /albums?updated=1', true, 303);
+    exit;
+}
+public function delete(int $id): void
+{
+    $token = $_POST['csrf_token'] ?? '';
+
+    if (
+        !is_string($token)
+        || !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        http_response_code(403);
+        echo 'Formulaire invalide. Rechargez la page.';
+        return;
+    }
+
+    if ($this->albumModel->find($id) === false) {
+        http_response_code(404);
+        echo 'Album introuvable.';
+        return;
+    }
+
+    try {
+        $deleted = $this->albumModel->delete($id);
+    } catch (PDOException $exception) {
+        error_log((string) $exception);
+        $deleted = false;
+    }
+
+    if (!$deleted) {
+        http_response_code(500);
+        echo 'Impossible de supprimer l’album. Veuillez réessayer.';
+        return;
+    }
+
+    header('Location: /albums?deleted=1', true, 303);
     exit;
 }
 }

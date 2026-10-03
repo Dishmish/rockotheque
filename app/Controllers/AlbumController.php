@@ -20,6 +20,7 @@ class AlbumController
         echo $this->twig->render('albums/index.twig', [
             'albums' => $albums,
             'created' => isset($_GET['created']),
+            'updated' => isset($_GET['updated']),
         ]);
     }
     public function show(
@@ -197,6 +198,90 @@ public function store(
         return;
     }
 
+    $result = $this->validateAlbumForm(
+        $genreModel,
+        $artistModel
+    );
+
+    if ($result['errors'] !== []) {
+        http_response_code(422);
+
+        $this->create(
+            $genreModel,
+            $artistModel,
+            $result['errors'],
+            $result['form']
+        );
+
+        return;
+    }
+
+    try {
+        $data = $result['data'];
+        $data['cover_image'] = null;
+
+        $created = $this->albumModel->create(
+            $data,
+            $result['form']['artist_ids']
+        );
+    } catch (PDOException $exception) {
+        error_log((string) $exception);
+        $created = false;
+    }
+
+    if (!$created) {
+        http_response_code(500);
+
+        $this->create(
+            $genreModel,
+            $artistModel,
+            ['Impossible d’ajouter l’album. Veuillez réessayer.'],
+            $result['form']
+        );
+
+        return;
+    }
+
+    header('Location: /albums?created=1', true, 303);
+    exit;
+}
+public function edit(
+    int $id,
+    Genre $genreModel,
+    Artist $artistModel,
+    array $errors = [],
+    array $form = []
+): void {
+    $album = $this->albumModel->find($id);
+
+    if ($album === false) {
+        http_response_code(404);
+        echo 'Album introuvable.';
+        return;
+    }
+
+    $form = array_merge([
+        'title' => $album['title'],
+        'release_year' => $album['release_year'],
+        'genre_id' => $album['genre_id'],
+        'artist_ids' => $album['artist_ids'],
+        'description' => $album['description'] ?? '',
+    ], $form);
+
+    echo $this->twig->render('albums/edit.twig', [
+        'album' => $album,
+        'genres' => $genreModel->getAll(),
+        'artists' => $artistModel->getAll(),
+        'errors' => $errors,
+        'form' => $form,
+        'current_year' => (int) date('Y'),
+        'csrf_token' => $_SESSION['csrf_token'],
+    ]);
+}
+private function validateAlbumForm(
+    Genre $genreModel,
+    Artist $artistModel
+): array {
     $form = [];
 
     foreach (
@@ -285,49 +370,84 @@ public function store(
         $errors[] = 'La description ne doit pas dépasser 5000 caractères.';
     }
 
-    if ($errors !== []) {
+    return [
+        'form' => $form,
+        'errors' => $errors,
+        'data' => [
+            'genre_id' => $genreId,
+            'title' => $form['title'],
+            'release_year' => $year,
+            'description' => $form['description'],
+        ],
+    ];
+}
+public function update(
+    int $id,
+    Genre $genreModel,
+    Artist $artistModel
+): void {
+    if ($this->albumModel->find($id) === false) {
+        http_response_code(404);
+        echo 'Album introuvable.';
+        return;
+    }
+
+    $token = $_POST['csrf_token'] ?? '';
+
+    if (
+        !is_string($token)
+        || !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        http_response_code(403);
+        echo 'Formulaire invalide. Rechargez la page.';
+        return;
+    }
+
+    $result = $this->validateAlbumForm(
+        $genreModel,
+        $artistModel
+    );
+
+    if ($result['errors'] !== []) {
         http_response_code(422);
 
-        $this->create(
+        $this->edit(
+            $id,
             $genreModel,
             $artistModel,
-            $errors,
-            $form
+            $result['errors'],
+            $result['form']
         );
 
         return;
     }
 
     try {
-        $created = $this->albumModel->create(
-            [
-                'genre_id' => $genreId,
-                'title' => $form['title'],
-                'release_year' => $year,
-                'cover_image' => null,
-                'description' => $form['description'],
-            ],
-            $form['artist_ids']
+        $updated = $this->albumModel->update(
+            $id,
+            $result['data'],
+            $result['form']['artist_ids']
         );
     } catch (PDOException $exception) {
         error_log((string) $exception);
-        $created = false;
+        $updated = false;
     }
 
-    if (!$created) {
+    if (!$updated) {
         http_response_code(500);
 
-        $this->create(
+        $this->edit(
+            $id,
             $genreModel,
             $artistModel,
-            ['Impossible d’ajouter l’album. Veuillez réessayer.'],
-            $form
+            ['Impossible de modifier l’album. Veuillez réessayer.'],
+            $result['form']
         );
 
         return;
     }
 
-    header('Location: /albums?created=1', true, 303);
+    header('Location: /albums?updated=1', true, 303);
     exit;
 }
 }

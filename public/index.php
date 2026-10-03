@@ -57,6 +57,62 @@ if ($method === 'GET' && $path === '/') {
 
     $controller->index();
 
+} elseif (
+    $method === 'GET'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/edit$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->edit(
+        $id,
+        new Genre($pdo),
+        new Artist($pdo)
+    );
+
+} elseif (
+    $method === 'POST'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/update$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->update(
+        $id,
+        new Genre($pdo),
+        new Artist($pdo)
+    );
+
 } elseif ($method === 'GET' && $path === '/albums/create') {
     $pdo = require __DIR__ . '/../config/database.php';
 

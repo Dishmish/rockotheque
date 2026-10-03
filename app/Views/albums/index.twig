@@ -15,8 +15,14 @@
 {% if created %}
     <p>L’album a été ajouté avec succès.</p>
 {% endif %}
+{% if updated %}
+    <p>L’album a été modifié avec succès.</p>
+{% endif %}
 
     {% for album in albums %}
+    <p>
+    <a href="/albums/{{ album.id }}/edit">Modifier</a>
+</p>
         <article>
             <h2>{{ album.title }}</h2>
 

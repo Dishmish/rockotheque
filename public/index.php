@@ -1,5 +1,20 @@
 <?php
 
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+
+$isHttps = isset($_SERVER['HTTPS'])
+    && $_SERVER['HTTPS'] !== ''
+    && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 session_start();
 
 if (!isset($_SESSION['csrf_token'])) {
@@ -14,9 +29,10 @@ require_once __DIR__ . '/../app/Models/AlbumArtist.php';
 require_once __DIR__ . '/../app/Models/Review.php';
 require_once __DIR__ . '/../app/Models/Genre.php';
 require_once __DIR__ . '/../app/Models/Artist.php';
-
+require_once __DIR__ . '/../app/Models/User.php';
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/AlbumController.php';
+require_once __DIR__ . '/../app/Controllers/AuthController.php';
 
 $loader = new \Twig\Loader\FilesystemLoader(
     __DIR__ . '/../app/Views'
@@ -31,7 +47,37 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = rtrim($path, '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'GET' && $path === '/') {
+if ($method === 'POST' && $path === '/logout') {
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AuthController(
+        new User($pdo),
+        $twig
+    );
+
+    $controller->logout();
+
+} elseif ($method === 'POST' && $path === '/login') {
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AuthController(
+        new User($pdo),
+        $twig
+    );
+
+    $controller->login();
+
+} elseif ($method === 'GET' && $path === '/login') {
+    $pdo = require __DIR__ . '/../config/database.php';
+
+    $controller = new AuthController(
+        new User($pdo),
+        $twig
+    );
+
+    $controller->loginForm();
+
+} elseif ($method === 'GET' && $path === '/') {
     $controller = new HomeController($twig);
     $controller->index();
 

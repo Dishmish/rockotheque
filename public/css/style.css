@@ -215,3 +215,26 @@ ul {
         padding: 18px;
     }
 }
+form.logout-form {
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    margin: 1rem auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.album-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px auto;
+}
+
+.album-actions form.logout-form {
+    margin: 0;
+}

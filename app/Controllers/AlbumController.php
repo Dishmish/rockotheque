@@ -23,6 +23,7 @@ class AlbumController
             'updated' => isset($_GET['updated']),
             'deleted' => isset($_GET['deleted']),
             'csrf_token' => $_SESSION['csrf_token'],
+            'is_logged_in' => isset($_SESSION['user_id']),
         ]);
     }
     public function show(

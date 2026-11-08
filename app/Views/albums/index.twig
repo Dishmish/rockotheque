@@ -9,8 +9,25 @@
 <body>
     <h1>Les albums de Rockothèque</h1>
 
-    <p><a href="/">Accueil</a></p>
-    <p><a href="/albums/create">Ajouter un album</a></p>
+ <nav class="album-actions">
+    <a href="/">Accueil</a>
+
+    <a href="/albums/create">Ajouter un album</a>
+
+    {% if is_logged_in %}
+        <form action="/logout" method="post" class="logout-form">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <button type="submit">Se déconnecter</button>
+        </form>
+    {% else %}
+        <a href="/login">Se connecter</a>
+    {% endif %}
+</nav>  
 
 {% if created %}
     <p>L’album a été ajouté avec succès.</p>

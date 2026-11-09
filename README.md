@@ -119,3 +119,6 @@ composer install --no-dev --optimize-autoloader
 Transférer également le dossier vendor.
 Conserver la configuration propre au serveur dans
 config/database.local.php et ne pas la publier dans Git.
+## Schéma de la base de données
+
+![Schéma relationnel du TP3](images/rockotheque-erd-tp3.png)

@@ -82,7 +82,15 @@ if ($isAdminRoute) {
     $auth->requireAdmin();
 }
 
-if ($method === 'GET' && $path === '/admin/logs') {
+if ($method === 'GET' && $path === '/admin') {
+    $controller = new AdminController(
+        $accessLog,
+        $twig
+    );
+
+    $controller->dashboard($auth);
+
+} elseif ($method === 'GET' && $path === '/admin/logs') {
     $controller = new AdminController(
         $accessLog,
         $twig

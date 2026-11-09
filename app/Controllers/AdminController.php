@@ -22,4 +22,13 @@ class AdminController
             'username' => $user['username'],
         ]);
     }
+    public function dashboard(Auth $auth): void
+{
+    $user = $auth->requireAdmin();
+
+    echo $this->twig->render('admin/dashboard.twig', [
+        'username' => $user['username'],
+        'csrf_token' => $_SESSION['csrf_token'],
+    ]);
+}
 }

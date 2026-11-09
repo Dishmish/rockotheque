@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration — Rockothèque</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Rockothèque</h1>
+
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/albums">Les albums</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Administration</h2>
+
+        <p>Bienvenue, {{ username }}.</p>
+
+        <article>
+            <h3>Gestion des albums</h3>
+
+            <p>Ajoutez des albums ou modifiez votre collection.</p>
+
+            <p>
+                <a href="/albums/create">Ajouter un album</a>
+            </p>
+
+            <p>
+                <a href="/albums">Modifier ou supprimer un album</a>
+            </p>
+        </article>
+
+        <article>
+            <h3>Journal de bord</h3>
+
+            <p>Consultez les visites et les accès aux pages du site.</p>
+
+            <p>
+                <a href="/admin/logs">Consulter le journal</a>
+            </p>
+        </article>
+
+        <form action="/logout" method="post" class="logout-form">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <button type="submit">Se déconnecter</button>
+        </form>
+    </main>
+</body>
+</html>

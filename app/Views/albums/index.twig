@@ -12,7 +12,9 @@
  <nav class="album-actions">
     <a href="/">Accueil</a>
 
+    {% if is_admin %}
     <a href="/albums/create">Ajouter un album</a>
+{% endif %}
 
     {% if is_logged_in %}
         <form action="/logout" method="post" class="logout-form">
@@ -58,25 +60,29 @@
             </p>
 
             <p>{{ album.description }}</p>
-            <form
-    action="/albums/{{ album.id }}/delete"
-    method="post"
-    onsubmit="return confirm('Voulez-vous vraiment supprimer cet album ?');"
->
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ csrf_token }}"
-    >
-
-    <button type="submit">Supprimer</button>
-</form>
-<p>
+          <p>
     <a href="/albums/{{ album.id }}">Voir les détails et les avis</a>
 </p>
-<p>
-    <a href="/albums/{{ album.id }}/edit">Modifier</a>
-</p>
+
+{% if is_admin %}
+    <p>
+        <a href="/albums/{{ album.id }}/edit">Modifier</a>
+    </p>
+
+    <form
+        action="/albums/{{ album.id }}/delete"
+        method="post"
+        onsubmit="return confirm('Voulez-vous vraiment supprimer cet album ?');"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token }}"
+        >
+
+        <button type="submit">Supprimer</button>
+    </form>
+{% endif %} 
         </article>
     {% else %}
         <p>Aucun album pour le moment.</p>

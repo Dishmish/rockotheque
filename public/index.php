@@ -30,6 +30,7 @@ require_once __DIR__ . '/../app/Models/Review.php';
 require_once __DIR__ . '/../app/Models/Genre.php';
 require_once __DIR__ . '/../app/Models/Artist.php';
 require_once __DIR__ . '/../app/Models/User.php';
+require_once __DIR__ . '/../app/Security/Auth.php';
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/AlbumController.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
@@ -46,6 +47,20 @@ $twig = new \Twig\Environment($loader, [
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = rtrim($path, '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
+$pdo = require __DIR__ . '/../config/database.php';
+$auth = new Auth(new User($pdo));
+
+$isAdminRoute =
+    $path === '/albums/create'
+    || $path === '/albums/store'
+    || preg_match(
+        '#^/albums/[1-9][0-9]*/(edit|update|delete)$#',
+        $path
+    ) === 1;
+
+if ($isAdminRoute) {
+    $auth->requireAdmin();
+}
 
 if ($method === 'POST' && $path === '/logout') {
     $pdo = require __DIR__ . '/../config/database.php';
@@ -102,7 +117,7 @@ if ($method === 'POST' && $path === '/logout') {
         $twig
     );
 
-    $controller->index();
+    $controller->index($auth);
 
 } elseif (
     $method === 'GET'

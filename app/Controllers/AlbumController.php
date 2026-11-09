@@ -13,19 +13,22 @@ class AlbumController
         $this->twig = $twig;
     }
 
-    public function index(): void
-    {
-        $albums = $this->albumModel->getAll();
+    public function index(Auth $auth): void
+{
+    $user = $auth->currentUser();
+    $albums = $this->albumModel->getAll();
 
-        echo $this->twig->render('albums/index.twig', [
-            'albums' => $albums,
-            'created' => isset($_GET['created']),
-            'updated' => isset($_GET['updated']),
-            'deleted' => isset($_GET['deleted']),
-            'csrf_token' => $_SESSION['csrf_token'],
-            'is_logged_in' => isset($_SESSION['user_id']),
-        ]);
-    }
+    echo $this->twig->render('albums/index.twig', [
+        'albums' => $albums,
+        'created' => isset($_GET['created']),
+        'updated' => isset($_GET['updated']),
+        'deleted' => isset($_GET['deleted']),
+        'csrf_token' => $_SESSION['csrf_token'],
+        'is_logged_in' => $user !== false,
+        'is_admin' => $user !== false
+            && $user['role'] === 'admin',
+    ]);
+}
     public function show(
     int $id,
     AlbumArtist $albumArtistModel,

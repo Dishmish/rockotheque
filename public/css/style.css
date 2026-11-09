@@ -238,3 +238,23 @@ form.logout-form {
 .album-actions form.logout-form {
     margin: 0;
 }
+.logs-table-wrapper {
+    overflow-x: auto;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 12px;
+    border: 1px solid #49505c;
+    text-align: left;
+}
+
+.logs-table th {
+    background: #20242c;
+    color: #ddb347;
+}

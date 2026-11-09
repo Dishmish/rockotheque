@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de bord — Rockothèque</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Rockothèque</h1>
+
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/albums">Les albums</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Journal de bord</h2>
+
+        <p>Administrateur : {{ username }}</p>
+        <p>Les 100 dernières visites sont affichées.</p>
+
+        <div class="logs-table-wrapper">
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Date et heure</th>
+                        <th scope="col">Utilisateur</th>
+                        <th scope="col">Adresse IP</th>
+                        <th scope="col">Méthode</th>
+                        <th scope="col">Page visitée</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td>{{ log.visited_at }}</td>
+                            <td>{{ log.username }}</td>
+                            <td>{{ log.ip_address }}</td>
+                            <td>{{ log.http_method }}</td>
+                            <td>{{ log.page }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">Aucune visite enregistrée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

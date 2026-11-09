@@ -12,8 +12,9 @@
  <nav class="album-actions">
     <a href="/">Accueil</a>
 
-    {% if is_admin %}
+   {% if is_admin %}
     <a href="/albums/create">Ajouter un album</a>
+    <a href="/admin/logs">Journal de bord</a>
 {% endif %}
 
     {% if is_logged_in %}

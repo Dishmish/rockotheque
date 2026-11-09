@@ -30,10 +30,12 @@ require_once __DIR__ . '/../app/Models/Review.php';
 require_once __DIR__ . '/../app/Models/Genre.php';
 require_once __DIR__ . '/../app/Models/Artist.php';
 require_once __DIR__ . '/../app/Models/User.php';
+require_once __DIR__ . '/../app/Models/AccessLog.php';
 require_once __DIR__ . '/../app/Security/Auth.php';
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/AlbumController.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
+require_once __DIR__ . '/../app/Controllers/AdminController.php';
 
 $loader = new \Twig\Loader\FilesystemLoader(
     __DIR__ . '/../app/Views'
@@ -49,6 +51,23 @@ $path = rtrim($path, '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 $pdo = require __DIR__ . '/../config/database.php';
 $auth = new Auth(new User($pdo));
+$currentUser = $auth->currentUser();
+
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+
+if (filter_var($ipAddress, FILTER_VALIDATE_IP) === false) {
+    $ipAddress = '0.0.0.0';
+}
+
+$accessLog = new AccessLog($pdo);
+
+$accessLog->record(
+    $currentUser !== false ? (int) $currentUser['id'] : null,
+    $currentUser !== false ? $currentUser['username'] : 'Visiteur',
+    $ipAddress,
+    mb_substr($path, 0, 2048, 'UTF-8'),
+    substr($method, 0, 10)
+);
 
 $isAdminRoute =
     $path === '/albums/create'
@@ -62,7 +81,15 @@ if ($isAdminRoute) {
     $auth->requireAdmin();
 }
 
-if ($method === 'POST' && $path === '/logout') {
+if ($method === 'GET' && $path === '/admin/logs') {
+    $controller = new AdminController(
+        $accessLog,
+        $twig
+    );
+
+    $controller->logs($auth);
+
+} elseif ($method === 'POST' && $path === '/logout') {
     $pdo = require __DIR__ . '/../config/database.php';
 
     $controller = new AuthController(

@@ -19,7 +19,13 @@
     <main>
         <article>
             <h2>{{ album.title }}</h2>
-
+            {% if album.cover_image %}
+    <img
+        src="{{ album.cover_image }}"
+        alt="Pochette de {{ album.title }}"
+        class="album-cover"
+    >
+{% endif %}
             <p>
                 <strong>Année :</strong>
                 {{ album.release_year }}

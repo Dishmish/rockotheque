@@ -496,4 +496,111 @@ public function delete(int $id): void
     header('Location: /albums?deleted=1', true, 303);
     exit;
 }
+public function coverForm(
+    int $id,
+    Auth $auth,
+    array $errors = []
+): void {
+    $auth->requireAdmin();
+
+    $album = $this->albumModel->find($id);
+
+    if ($album === false) {
+        http_response_code(404);
+        echo 'Album introuvable.';
+        return;
+    }
+
+    echo $this->twig->render('albums/cover.twig', [
+        'album' => $album,
+        'errors' => $errors,
+        'csrf_token' => $_SESSION['csrf_token'],
+    ]);
+}
+public function uploadCover(
+    int $id,
+    Auth $auth,
+    CoverUploader $uploader
+): void {
+    $auth->requireAdmin();
+
+    $album = $this->albumModel->find($id);
+
+    if ($album === false) {
+        http_response_code(404);
+        echo 'Album introuvable.';
+        return;
+    }
+
+    $token = $_POST['csrf_token'] ?? '';
+
+    if (
+        !is_string($token)
+        || !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        http_response_code(403);
+        echo 'Formulaire invalide. Rechargez la page.';
+        return;
+    }
+
+    $file = $_FILES['cover'] ?? [];
+
+    if (!is_array($file)) {
+        $file = [];
+    }
+
+    $coverPath = null;
+
+    try {
+        $coverPath = $uploader->upload($file);
+
+        $saved = $this->albumModel->updateCover(
+            $id,
+            $coverPath
+        );
+
+        if (!$saved) {
+            throw new RuntimeException(
+                'Enregistrement de la pochette impossible.'
+            );
+        }
+    } catch (InvalidArgumentException $exception) {
+        http_response_code(422);
+
+        $this->coverForm(
+            $id,
+            $auth,
+            [$exception->getMessage()]
+        );
+
+        return;
+    } catch (RuntimeException $exception) {
+        if ($coverPath !== null) {
+            $filePath = __DIR__ . '/../../public' . $coverPath;
+
+            if (is_file($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        error_log((string) $exception);
+        http_response_code(500);
+
+        $this->coverForm(
+            $id,
+            $auth,
+            ['Impossible d’enregistrer la pochette. Veuillez réessayer.']
+        );
+
+        return;
+    }
+
+    header(
+        'Location: /albums/' . $id . '?cover_updated=1',
+        true,
+        303
+    );
+
+    exit;
+}
 }

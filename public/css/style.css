@@ -258,3 +258,11 @@ form.logout-form {
     background: #20242c;
     color: #ddb347;
 }
+.album-cover {
+    display: block;
+    width: 250px;
+    max-width: 100%;
+    height: auto;
+    margin: 16px 0;
+    border-radius: 6px;
+}

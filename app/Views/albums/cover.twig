@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pochette — {{ album.title }} — Rockothèque</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Rockothèque</h1>
+
+        <nav>
+            <a href="/admin">Administration</a>
+            <a href="/albums">Les albums</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Pochette de l’album : {{ album.title }}</h2>
+
+        {% if errors %}
+            <section role="alert">
+                <h3>Veuillez corriger les erreurs :</h3>
+
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if album.cover_image %}
+            <p>
+                <img
+                    src="{{ album.cover_image }}"
+                    alt="Pochette de {{ album.title }}"
+                    class="album-cover"
+                >
+            </p>
+        {% endif %}
+
+        <form
+            action="/albums/{{ album.id }}/cover"
+            method="post"
+            enctype="multipart/form-data"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <p>
+                <label for="cover">Choisir une pochette</label><br>
+
+                <input
+                    type="file"
+                    id="cover"
+                    name="cover"
+                    accept="image/jpeg,image/png"
+                    required
+                >
+            </p>
+
+            <p>
+                JPEG ou PNG, maximum 2 Mo.
+                Dimensions maximales : 5000 × 5000 pixels.
+            </p>
+
+            <button type="submit">Enregistrer la pochette</button>
+        </form>
+    </main>
+</body>
+</html>

@@ -215,4 +215,17 @@ public function delete(int $id): bool
         'id' => $id,
     ]);
 }
+public function updateCover(int $id, string $coverImage): bool
+{
+    $statement = $this->pdo->prepare(
+        'UPDATE albums
+         SET cover_image = :cover_image
+         WHERE id = :id'
+    );
+
+    return $statement->execute([
+        'cover_image' => $coverImage,
+        'id' => $id,
+    ]);
+}
 }

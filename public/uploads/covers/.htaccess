@@ -1,0 +1,4 @@
+# Seuls les noms d’images générés par l’application sont accessibles.
+<FilesMatch "^(?![a-f0-9]{32}\.(jpg|png)$)">
+    Require all denied
+</FilesMatch>

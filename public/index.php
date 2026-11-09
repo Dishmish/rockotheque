@@ -32,6 +32,7 @@ require_once __DIR__ . '/../app/Models/Artist.php';
 require_once __DIR__ . '/../app/Models/User.php';
 require_once __DIR__ . '/../app/Models/AccessLog.php';
 require_once __DIR__ . '/../app/Security/Auth.php';
+require_once __DIR__ . '/../app/Services/CoverUploader.php';
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/AlbumController.php';
 require_once __DIR__ . '/../app/Controllers/AuthController.php';
@@ -82,7 +83,55 @@ if ($isAdminRoute) {
     $auth->requireAdmin();
 }
 
-if ($method === 'GET' && $path === '/admin') {
+if (
+    $method === 'POST'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/cover$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->uploadCover(
+        $id,
+        $auth,
+        new CoverUploader()
+    );
+
+} elseif (
+    $method === 'GET'
+    && preg_match(
+        '#^/albums/([1-9][0-9]*)/cover$#',
+        $path,
+        $matches
+    )
+) {
+    $id = filter_var($matches[1], FILTER_VALIDATE_INT);
+
+    if ($id === false) {
+        http_response_code(400);
+        exit('Identifiant invalide.');
+    }
+
+    $controller = new AlbumController(
+        new Album($pdo),
+        $twig
+    );
+
+    $controller->coverForm($id, $auth);
+
+} elseif ($method === 'GET' && $path === '/admin') {
     $controller = new AdminController(
         $accessLog,
         $twig

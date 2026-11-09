@@ -5,6 +5,8 @@ RewriteRule ^public/ - [L]
 
 # Servir les fichiers CSS.
 RewriteRule ^css/(.*)$ public/css/$1 [L]
+# Servir les pochettes des albums.
+RewriteRule ^uploads/covers/([a-f0-9]{32}\.(jpg|png))$ public/uploads/covers/$1 [L]
 
 # Envoyer les requêtes directement au contrôleur frontal.
 RewriteRule ^ public/index.php [L]

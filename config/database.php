@@ -32,8 +32,7 @@ try {
         $options
     );
 } catch (PDOException $exception) {
-    exit(
-        'Erreur de connexion à la base de données : '
-        . $exception->getMessage()
-    );
+    error_log((string) $exception);
+    http_response_code(500);
+    exit('Connexion à la base de données indisponible.');
 }

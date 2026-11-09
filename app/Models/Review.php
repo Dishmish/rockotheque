@@ -27,36 +27,40 @@ class Review extends Model
     }
 
     public function create(
-        int $albumId,
-        string $reviewerName,
-        int $rating,
-        ?string $comment
-    ): bool {
-        if ($rating < 1 || $rating > 5) {
-            throw new InvalidArgumentException(
-                'La note doit être comprise entre 1 et 5.'
-            );
-        }
-
-        $statement = $this->pdo->prepare(
-            'INSERT INTO reviews (
-                album_id,
-                reviewer_name,
-                rating,
-                comment
-             ) VALUES (
-                :album_id,
-                :reviewer_name,
-                :rating,
-                :comment
-             )'
+    int $albumId,
+    string $reviewerName,
+    int $rating,
+    ?string $comment,
+    int $userId
+): bool {
+    if ($rating < 1 || $rating > 5) {
+        throw new InvalidArgumentException(
+            'La note doit être comprise entre 1 et 5.'
         );
-
-        return $statement->execute([
-            'album_id' => $albumId,
-            'reviewer_name' => $reviewerName,
-            'rating' => $rating,
-            'comment' => $comment,
-        ]);
     }
+
+    $statement = $this->pdo->prepare(
+        'INSERT INTO reviews (
+            album_id,
+            user_id,
+            reviewer_name,
+            rating,
+            comment
+         ) VALUES (
+            :album_id,
+            :user_id,
+            :reviewer_name,
+            :rating,
+            :comment
+         )'
+    );
+
+    return $statement->execute([
+        'album_id' => $albumId,
+        'user_id' => $userId,
+        'reviewer_name' => $reviewerName,
+        'rating' => $rating,
+        'comment' => $comment,
+    ]);
+}
 }

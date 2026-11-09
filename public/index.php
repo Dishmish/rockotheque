@@ -52,6 +52,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $pdo = require __DIR__ . '/../config/database.php';
 $auth = new Auth(new User($pdo));
 $currentUser = $auth->currentUser();
+$twig->addGlobal('current_user', $currentUser);
 
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
 
@@ -286,10 +287,11 @@ if ($method === 'GET' && $path === '/admin/logs') {
     );
 
     $controller->createReview(
-        $id,
-        new AlbumArtist($pdo),
-        new Review($pdo)
-    );
+    $id,
+    new AlbumArtist($pdo),
+    new Review($pdo),
+    $auth
+);
 
 } else {
     http_response_code(404);

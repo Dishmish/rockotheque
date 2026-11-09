@@ -67,8 +67,10 @@ class AlbumController
 public function createReview(
     int $id,
     AlbumArtist $albumArtistModel,
-    Review $reviewModel
+    Review $reviewModel,
+    Auth $auth
 ): void {
+    $user = $auth->requireLogin();
     if ($this->albumModel->find($id) === false) {
         http_response_code(404);
         echo 'Album introuvable.';
@@ -86,12 +88,14 @@ public function createReview(
         return;
     }
 
-    $form = [];
+    $form = [
+    'reviewer_name' => $user['username'],
+];
 
-    foreach (['reviewer_name', 'rating', 'comment'] as $field) {
-        $value = $_POST[$field] ?? '';
-        $form[$field] = is_string($value) ? trim($value) : '';
-    }
+foreach (['rating', 'comment'] as $field) {
+    $value = $_POST[$field] ?? '';
+    $form[$field] = is_string($value) ? trim($value) : '';
+}
 
     $errors = [];
 
@@ -134,11 +138,12 @@ public function createReview(
 
     try {
         $created = $reviewModel->create(
-            $id,
-            $form['reviewer_name'],
-            $rating,
-            $form['comment']
-        );
+    $id,
+    $form['reviewer_name'],
+    $rating,
+    $form['comment'],
+    (int) $user['id']
+);
     } catch (PDOException $exception) {
         error_log((string) $exception);
         $created = false;

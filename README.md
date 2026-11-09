@@ -1,8 +1,10 @@
-# Rockothèque — TP2 MVC
+# Rockothèque — TP3
 
-Rockothèque est une application web permettant de gérer une collection
-personnelle d’albums rock. Ce projet poursuit le TP1 avec une migration
-vers l’architecture MVC.
+Projet réalisé par Dmytro Makarenko dans le cadre du cours
+Programmation Web avancée.
+
+Application PHP orientée objet utilisant une architecture MVC,
+Twig et MySQL pour gérer une collection d’albums rock.
 
 ## Liens
 
@@ -11,36 +13,61 @@ vers l’architecture MVC.
 
 ## Fonctionnalités
 
-- Consulter les albums, leurs artistes et leurs genres.
-- Ajouter, modifier et supprimer un album.
-- Consulter et publier des avis.
-- Afficher la note moyenne des albums.
-- Valider les données et les relations avant leur enregistrement.
-- Protéger les formulaires avec un jeton CSRF.
+- Consultation des albums, artistes, genres et notes moyennes.
+- Connexion et déconnexion avec sessions.
+- Deux rôles : client et administrateur.
+- Publication d’avis par les utilisateurs connectés.
+- Ajout, modification et suppression des albums par l’administrateur.
+- Tableau de bord et journal des visites réservés à l’administrateur.
+- Téléversement et affichage des pochettes d’albums.
 
-## Technologies
+## Sécurité
 
-PHP orienté objet, MySQL, PDO, Twig, Composer, HTML et CSS.
+Les mots de passe sont hachés avec password_hash et vérifiés
+avec password_verify. Les droits sont contrôlés côté serveur.
 
-## Architecture MVC
+Les formulaires POST utilisent un jeton CSRF. Les requêtes SQL
+avec des paramètres utilisent PDO et des requêtes préparées.
+Twig assure l’échappement HTML des données affichées.
 
-- `app/Models` : accès aux données.
-- `app/Controllers` : traitement des requêtes et validation.
-- `app/Views` : affichage avec Twig.
-- `public/index.php` : contrôleur frontal et routage.
-- `public/css` : styles.
-- `config` : connexion à la base de données.
+Les pochettes sont réservées à l’administrateur. Le serveur vérifie
+le type MIME, les dimensions et la taille du fichier :
+JPEG ou PNG, maximum 2 Mo et 5000 × 5000 pixels.
+Un nom aléatoire est généré pour chaque image.
+
+## Organisation
+
+- app/Models : accès aux données.
+- app/Controllers : traitement des requêtes et validation.
+- app/Views : vues Twig.
+- app/Security : vérification de la connexion et des rôles.
+- app/Services : téléversement des pochettes.
+- public/index.php : contrôleur frontal et routes.
+- public/css : styles.
+- public/uploads/covers : pochettes.
+- config : configuration de la connexion MySQL.
+- migrations : modifications de la structure de la base.
+- scripts : création des utilisateurs et réinitialisation du mot de passe administrateur en ligne de commande.
 
 ## Installation locale
 
-1. Installer PHP avec PDO MySQL et Composer.
-2. Exécuter `composer install`.
-3. Importer `database.sql` dans MySQL.
-   Attention : ce script supprime et recrée la base `rockotheque`.
-   Ne pas l’exécuter sur une base contenant des données à conserver.
-4. Copier `config/database.example.php` vers
-   `config/database.local.php` et renseigner la connexion.
-5. Depuis la racine du projet, démarrer le serveur :
+1. Disposer de PHP 8.4 ou supérieur, MySQL et Composer.
+   Extensions PHP nécessaires : pdo_mysql, mbstring et fileinfo.
+2. Installer les dépendances :
+
+```bash
+composer install
+```
+
+3. Créer une base MySQL nommée rockotheque avec le jeu de caractères
+   utf8mb4, puis importer database.sql dans cette base.
+
+   Attention : cet export remplace les tables qu’il contient.
+   Utiliser une base dédiée et sauvegarder les données existantes.
+
+4. Copier config/database.example.php vers config/database.local.php
+   et renseigner les paramètres de connexion.
+5. Démarrer le serveur depuis la racine du projet :
 
 ```bash
 php -S localhost:8001 -t public
@@ -48,26 +75,47 @@ php -S localhost:8001 -t public
 
 6. Ouvrir http://localhost:8001.
 
+L’export SQL contient déjà la structure du TP3.
+Ne pas appliquer les migrations après son import complet.
+
+## Comptes utilisateurs
+
+Les accès de démonstration sont fournis dans le rapport de remise.
+Les mots de passe en clair ne sont pas publiés dans ce dépôt.
+
+Pour créer un autre compte depuis un terminal :
+
+```bash
+php scripts/create-user.php
+```
+
+Pour changer le mot de passe du compte admin :
+
+```bash
+php scripts/reset-admin-password.php
+```
+
+Ces scripts sont destinés au terminal Ubuntu et ne peuvent pas
+être exécutés depuis le navigateur.
+
 ## Hébergement Apache
 
-Le dossier `public` peut être utilisé comme racine du site.
+Utiliser public comme racine du site lorsque cela est possible.
 
-Lorsque le projet est placé entièrement dans `htdocs`, le fichier
-`.htaccess` à la racine dirige les requêtes vers `public/index.php`
-et les fichiers CSS vers `public/css`.
+Si le projet est placé entièrement dans htdocs, le fichier
+.htaccess à la racine dirige les requêtes vers le contrôleur
+frontal et permet de servir les styles et les pochettes.
 
-Les règles nécessitent le module Apache `mod_rewrite` et
-l’autorisation des fichiers `.htaccess`.
+Apache doit autoriser les fichiers .htaccess et la réécriture
+des URL. Le dossier public/uploads/covers doit être accessible
+en écriture par PHP.
 
-Installer les dépendances avant leur transfert :
+Installer les dépendances avant le transfert :
 
 ```bash
 composer install --no-dev --optimize-autoloader
 ```
 
-Conserver sur le serveur son propre `config/database.local.php`.
-Ne pas publier les identifiants de connexion dans GitHub.
-
-## Schéma de la base de données
-
-![Schéma relationnel](images/rockotheque-erd.png)
+Transférer également le dossier vendor.
+Conserver la configuration propre au serveur dans
+config/database.local.php et ne pas la publier dans Git.
